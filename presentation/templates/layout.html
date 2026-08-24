@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KNN Candle — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/data.css') }}">
+</head>
+<body>
+
+  <!-- ================= KERANGKA (SHELL) ================= -->
+  <!-- Bagian ini dipakai bersama oleh section KNN maupun Data -->
+  <div class="app">
+
+    <header class="topbar">
+      <div class="topbar__brand">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <rect x="4"  y="9"  width="3" height="8" rx="0.5" fill="var(--bull)"/>
+            <line x1="5.5" y1="5" x2="5.5" y2="9" stroke="var(--bull)" stroke-width="1.4"/>
+            <line x1="5.5" y1="17" x2="5.5" y2="20" stroke="var(--bull)" stroke-width="1.4"/>
+            <rect x="10" y="6"  width="3" height="7" rx="0.5" fill="var(--bear)"/>
+            <line x1="11.5" y1="3" x2="11.5" y2="6" stroke="var(--bear)" stroke-width="1.4"/>
+            <line x1="11.5" y1="13" x2="11.5" y2="16" stroke="var(--bear)" stroke-width="1.4"/>
+            <rect x="16" y="11" width="3" height="6" rx="0.5" fill="var(--bull)"/>
+            <line x1="17.5" y1="8" x2="17.5" y2="11" stroke="var(--bull)" stroke-width="1.4"/>
+            <line x1="17.5" y1="17" x2="17.5" y2="19" stroke="var(--bull)" stroke-width="1.4"/>
+          </svg>
+        </span>
+        <span class="brand__text">KNN<em>Candle</em></span>
+      </div>
+
+      <nav class="topbar__nav" role="tablist" aria-label="Navigasi utama">
+        <button class="navlink is-active" role="tab" aria-selected="true" data-target="knn">
+          Model KNN
+        </button>
+        <button class="navlink" role="tab" aria-selected="false" data-target="data">
+          Data
+        </button>
+      </nav>
+
+      <div class="topbar__status">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">Siap</span>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ============ SECTION: KNN ============ -->
+      <section id="panel-knn" class="panel is-active" role="tabpanel" aria-labelledby="knn">
+        <div class="panel__header">
+          <h1>Model KNN Candle</h1>
+          <p>Chart candlestick, prediksi, dan kontrol model akan ditempatkan di sini.</p>
+        </div>
+
+        <div class="panel__body">
+          <div class="knn-chart-panel">
+            {% include 'candle.html' %}
+          </div>
+          {% include 'prediction.html' %}
+        </div>
+      </section>
+
+      <!-- ============ SECTION: DATA (isi bebas, ini placeholder) ============ -->
+      <section id="panel-data" class="panel" role="tabpanel" aria-labelledby="data">
+        <div class="panel__header">
+          <h1>Manajemen Data</h1>
+          <p>Kelola dataset yang digunakan oleh model KNN di sini.</p>
+        </div>
+
+        <div class="panel__body">
+          {% include 'data.html' %}
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <!-- ================= END KERANGKA ================= -->
+
+<script src="{{ url_for('static', filename='js/layout.js') }}"></script>
+<script src="{{ url_for('static', filename='js/data.js') }}"></script>
+</body>
+</html>

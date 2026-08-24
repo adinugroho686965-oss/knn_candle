@@ -1,0 +1,71 @@
+<!-- ============ CANDLE.HTML ============ -->
+<!-- Partial ini di-include ke dalam .knn-chart-panel pada layout.html -->
+
+<!-- ===== DEPENDENCIES ===== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+<!-- hammerjs wajib ada SEBELUM chartjs-plugin-zoom, dipakai untuk pinch-zoom di touch device -->
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/candle.css') }}">
+
+<!-- ===== TOOLBAR: pilih coin & timeframe ===== -->
+<div class="chart-toolbar">
+
+  <!-- Coin combobox: trigger + dropdown panel berisi search input & list -->
+  <div class="coin-combo" id="coinCombo">
+    <button
+      type="button"
+      class="coin-combo__trigger"
+      id="coinComboTrigger"
+      aria-haspopup="listbox"
+      aria-expanded="false"
+    >
+      <span class="coin-combo__dot" aria-hidden="true"></span>
+      <span class="coin-combo__value" id="coinComboValue">Memuat coin...</span>
+      <svg class="coin-combo__chevron" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+        <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="coin-combo__panel" id="coinComboPanel" hidden>
+      <div class="coin-combo__search-wrap">
+        <svg class="coin-combo__search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="text"
+          id="coinComboSearch"
+          class="coin-combo__search"
+          placeholder="Cari coin..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+      </div>
+      <ul class="coin-combo__list" id="coinComboList" role="listbox" aria-label="Daftar coin"></ul>
+      <div class="coin-combo__empty" id="coinComboEmpty" hidden>Coin tidak ditemukan</div>
+    </div>
+  </div>
+
+  <select id="timeframeSelect" class="chart-select" aria-label="Pilih timeframe">
+    <option value="1m">1m</option>
+    <option value="5m">5m</option>
+    <option value="15m">15m</option>
+    <option value="1h">1h</option>
+    <option value="4h">4h</option>
+    <option value="1d">1d</option>
+  </select>
+</div>
+
+<!-- ===== CANVAS ===== -->
+<!-- dibungkus .chart-container: Chart.js dengan maintainAspectRatio:false
+     butuh parent yang punya tinggi eksplisit, kalau tidak canvas-nya
+     bisa collapse (0px) atau malah tumbuh tak terbatas. -->
+<div class="chart-container">
+  <canvas id="candleCanvas"></canvas>
+</div>
+
+<script src="{{ url_for('static', filename='js/candle.js') }}"></script>

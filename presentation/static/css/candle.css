@@ -1,0 +1,393 @@
+:root {
+  /* --- palette (trading-terminal, gelap) --- */
+  --bg:        #0B0E14;
+  --surface:   #131722;
+  --surface-2: #171B26;
+  --border:    #232733;
+  --text:      #D1D4DC;
+  --text-muted:#787B86;
+  --bull:      #26A69A; /* hijau candle naik */
+  --bear:      #EF5350; /* merah candle turun */
+  --accent:    #4C8DFF; /* aksen interaktif (fokus, active) */
+
+  /* --- type --- */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+}
+
+button { font-family: inherit; }
+
+/* ============ SHELL LAYOUT ============ */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+  padding: 0 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand__text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+.brand__text em {
+  font-style: normal;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.topbar__nav {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.navlink {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.navlink:hover { color: var(--text); background: var(--surface-2); }
+.navlink:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.navlink.is-active {
+  color: var(--text);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.topbar__status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--bull);
+  box-shadow: 0 0 0 3px rgba(38, 166, 154, 0.15);
+}
+
+/* ============ CONTENT / PANELS ============ */
+.content {
+  flex: 1;
+  padding: 28px 32px 40px;
+}
+
+.panel { display: none; }
+.panel.is-active {
+  display: block;
+  animation: fade-in 0.15s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.panel__header h1 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+.panel__header p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.panel__body {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+#panel-data .panel__body {
+  grid-template-columns: 1fr;
+}
+
+.placeholder-box {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.placeholder-box--side { min-height: 480px; }
+.placeholder-box--full { min-height: 520px; }
+
+/* ============ KNN CHART PANEL (candle.html) ============ */
+/* Chart.js dengan maintainAspectRatio:false butuh parent bertinggi
+   eksplisit -- tanpa ini, canvas bisa collapse jadi 0px atau tumbuh
+   tak terbatas tiap kali chart di-update. */
+.knn-chart-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  height: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chart-toolbar {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative; /* jadi acuan posisi absolut .coin-combo__panel */
+}
+
+.chart-select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.chart-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* ============ COIN COMBOBOX (search + dropdown) ============ */
+.coin-combo {
+  position: relative;
+  min-width: 168px;
+}
+
+.coin-combo__trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.coin-combo__trigger:hover {
+  border-color: #2E3444;
+}
+.coin-combo__trigger:focus-visible,
+.coin-combo[data-open] .coin-combo__trigger {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.15);
+}
+
+.coin-combo__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bull);
+  flex-shrink: 0;
+}
+
+.coin-combo__value {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.coin-combo__chevron {
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+.coin-combo__trigger[aria-expanded="true"] .coin-combo__chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+.coin-combo__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 240px;
+  max-width: 80vw;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  z-index: 20;
+  overflow: hidden;
+  animation: combo-pop 0.12s ease;
+}
+
+@keyframes combo-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.coin-combo__search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.coin-combo__search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.coin-combo__search {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.coin-combo__search::placeholder {
+  color: var(--text-muted);
+}
+
+.coin-combo__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.coin-combo__list::-webkit-scrollbar {
+  width: 8px;
+}
+.coin-combo__list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+.coin-combo__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.coin-combo__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+.coin-combo__item-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+.coin-combo__item.is-active {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.coin-combo__item.is-selected {
+  color: var(--accent);
+}
+.coin-combo__item.is-selected .coin-combo__item-dot {
+  background: var(--bull);
+}
+.coin-combo__item.is-selected.is-active {
+  background: rgba(76, 141, 255, 0.08);
+}
+
+.coin-combo__empty {
+  padding: 16px 10px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.chart-container {
+  position: relative;
+  flex: 1;
+  min-height: 0; /* penting: biar flex child bisa mengecil, bukan overflow parent */
+  width: 100%;
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 720px) {
+  .topbar { gap: 16px; padding: 0 14px; }
+  .brand__text { font-size: 14px; }
+  .topbar__status { display: none; }
+  .content { padding: 20px 16px 32px; }
+  .panel__body { grid-template-columns: 1fr; }
+  .coin-combo { min-width: 140px; }
+  .coin-combo__panel { width: 220px; }
+}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce) {
+  .panel.is-active { animation: none; }
+  .coin-combo__panel { animation: none; }
+}

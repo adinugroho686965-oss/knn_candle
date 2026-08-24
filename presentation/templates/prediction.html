@@ -1,0 +1,131 @@
+<!-- ============ PREDICTION_ANALYSIS.HTML ============ -->
+<!-- Versi "analisa" dari prediction.html. UI mirip, tapi prediksi TIDAK
+     otomatis jalan tiap candle close -- user yang trigger manual lewat
+     tombol "Predict Last N Candle". Hasilnya juga divisualisasikan ke
+     candle chart (lihat prediction_analysis.js -> visualizePredictionOnChart). -->
+     <link rel="stylesheet" href="{{ url_for('static', filename='css/prediction.css') }}">
+
+     <div class="predict-panel">
+     
+       <div class="predict-panel__header">
+         <h2>Prediksi (Analisa)</h2>
+         <span id="predict-status" class="status-pill" data-state="idle">Siap</span>
+       </div>
+     
+       <div class="predict-panel__body">
+     
+         <!-- ===== KONFIGURASI MODEL ===== -->
+         <p class="predict-section-label">Konfigurasi Model</p>
+     
+         <form id="predict-form" class="predict-form">
+     
+           <div class="field">
+             <label for="predict-coin-select" class="field__label">Pasangan Koin</label>
+             <select id="predict-coin-select" class="predict-select">
+               <option value="">Memuat koin...</option>
+             </select>
+           </div>
+     
+           <div class="field-row">
+             <div class="field">
+               <label for="predict-k" class="field__label">Jumlah Neighbor (K)</label>
+               <input type="number" id="predict-k" name="predict-k" class="field__input" min="1" step="1" value="5">
+             </div>
+             <div class="field">
+               <label for="predict-threshold" class="field__label">Ambang Kemiripan (%)</label>
+               <input type="number" id="predict-threshold" name="predict-threshold" class="field__input" min="0" max="100" step="1" value="70">
+             </div>
+           </div>
+     
+           <div class="field-row">
+             <div class="field">
+               <label for="predict-input-len" class="field__label">Panjang Input (candle)</label>
+               <input type="number" id="predict-input-len" name="predict-input-len" class="field__input" min="1" step="1" value="10">
+             </div>
+             <div class="field">
+               <label for="predict-output-len" class="field__label">Panjang Output (candle)</label>
+               <input type="number" id="predict-output-len" name="predict-output-len" class="field__input" min="1" step="1" value="1">
+             </div>
+           </div>
+     
+           <button type="submit" id="prepare-model-btn" class="btn btn--primary predict-run-btn">
+             Siapkan Model
+           </button>
+         </form>
+     
+         <hr class="predict-divider">
+     
+         <!-- ===== JALANKAN PREDIKSI MANUAL ===== -->
+         <p class="predict-section-label">Jalankan Prediksi</p>
+     
+         <div class="predict-manual-controls">
+           <label class="predict-checkbox">
+             <input type="checkbox" id="predict-include-unclosed">
+             <span>Sertakan candle terakhir yang belum close</span>
+           </label>
+     
+           <button type="button" id="predict-run-last-n-btn" class="btn btn--primary predict-run-btn">
+             Predict Last N Candle
+           </button>
+           <p class="predict-manual-hint" id="predict-manual-hint">
+             N = Panjang Input pada konfigurasi model di atas.
+           </p>
+         </div>
+     
+         <hr class="predict-divider">
+     
+         <!-- ===== HASIL PREDIKSI ===== -->
+         <p class="predict-section-label">Hasil Prediksi</p>
+         <p class="predict-result__meta" id="predict-result-meta">Belum pernah dijalankan</p>
+     
+         <!-- state kosong: ditampilkan sebelum prediksi pernah dijalankan. -->
+         <div id="predict-result-empty" class="predict-result-empty">
+           Belum ada prediksi. Siapkan model, atur checkbox jika perlu, lalu klik "Predict Last N Candle".
+         </div>
+     
+         <div id="predict-result-filled" hidden>
+     
+           <!-- Arah prediksi -->
+           <div class="predict-direction predict-direction--up" id="predict-direction">
+             <span class="predict-direction__icon" aria-hidden="true">
+               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                 <path d="M8 3L13 12H3L8 3Z" fill="currentColor"/>
+               </svg>
+             </span>
+             <div class="predict-direction__text">
+               <div class="predict-direction__label">
+                 <span id="predict-direction-label">NAIK</span>
+               </div>
+               <div class="predict-direction__sub">Kemiripan rata-rata: <span id="predict-confidence">82%</span></div>
+             </div>
+           </div>
+     
+           <!-- Jumlah neighbor yang searah naik / turun -->
+           <div class="predict-stats">
+             <div class="stat-box stat-box--correct">
+               <div class="stat-box__value" id="predict-up-count">7</div>
+               <div class="stat-box__label">Neighbor arah naik</div>
+             </div>
+             <div class="stat-box stat-box--wrong">
+               <div class="stat-box__value" id="predict-down-count">3</div>
+               <div class="stat-box__label">Neighbor arah turun</div>
+             </div>
+           </div>
+     
+           <!-- Bar dominasi arah (porsi neighbor yang searah dengan hasil akhir) -->
+           <div class="predict-accuracy">
+             <div class="predict-accuracy__label">
+               <span>Dominasi arah</span>
+               <strong id="predict-accuracy-text">70% (7/10)</strong>
+             </div>
+             <div class="predict-accuracy__bar">
+               <div class="predict-accuracy__fill" id="predict-accuracy-fill" style="width: 70%;"></div>
+             </div>
+           </div>
+     
+         </div>
+     
+       </div>
+     </div>
+     
+     <script src="{{ url_for('static', filename='js/prediction.js') }}"></script>
