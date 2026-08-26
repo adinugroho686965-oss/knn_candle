@@ -1,9 +1,7 @@
 import uuid
 
 from flask import Blueprint, jsonify, request, session
-
-if __name__=="__main__":
-    from ..services import model_manager
+from services import model_manager
 
 model = Blueprint("model", __name__)
 

@@ -1,14 +1,4 @@
-if True:
-    import sys
-    import os
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    parent_dir = os.path.dirname(current_dir)
-    sys.path.append(parent_dir)
-    from database import database
-else:
-
-    database= None
-
+from database import database
 from sklearn.neighbors import KNeighborsRegressor
 import numpy as np
 

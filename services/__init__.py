@@ -7,7 +7,3 @@ from . import model_manager
 
 
 
-def has_accest_to(database,machine_learning):
-    candle_service.database=database.database
-    coin_service.database=database.database
-    model_manager.model = machine_learning.model

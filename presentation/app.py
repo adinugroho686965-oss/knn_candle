@@ -1,5 +1,4 @@
-if __name__=='__main__':
-    from ..services import candle_service
+from services import candle_service
 from flask import Flask, render_template, jsonify
 from flask import session
 from .candle import candle

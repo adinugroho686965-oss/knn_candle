@@ -1,8 +1,5 @@
 from flask import Blueprint, jsonify
-
-
-if __name__=='__main__':
-    from ..services import candle_service,coin_service
+from services import candle_service,coin_service
 
 
 candle = Blueprint("candle", __name__)

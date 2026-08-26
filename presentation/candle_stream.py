@@ -37,8 +37,7 @@ Install dependency:
 from __future__ import annotations
 
 import json
-if __name__=="__main__":
-    from ..services.websocket_manager import ws_manager
+from services.websocket_manager import ws_manager
 
 # daftar interval yang valid, biar tidak asal buka koneksi ke Binance
 # kalau ada typo / request iseng

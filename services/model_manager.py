@@ -1,6 +1,4 @@
-
-if __name__ == "___main__":
-    from ..machine_learning import model 
+from machine_learning import model 
 
 
 class ModelManager:

@@ -4,8 +4,7 @@ from flask import jsonify,request
 from flask import session
 
 
-if __name__=='__main__':
-    from ..services import candle_service,scraping_manager
+from services import candle_service,scraping_manager
     
 
 
