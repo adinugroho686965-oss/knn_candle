@@ -1,45 +1,45 @@
 <!-- ============ DATA.HTML ============ -->
-<!-- Partial ini di-include ke dalam #panel-data pada layout.html -->
+<!-- This partial is included into #panel-data in layout.html -->
 
 <div class="data-grid">
 
   <!-- ---------- CARD: SCRAPING ---------- -->
   <div class="card">
     <div class="card__header">
-      <h2>Scraping Data</h2>
-      <span id="scrape-status" class="status-pill" data-state="idle">Siap</span>
+      <h2>Data Scraping</h2>
+      <span id="scrape-status" class="status-pill" data-state="idle">Ready</span>
     </div>
 
     <form id="scrape-form" class="scrape-form">
-      <label for="scrape-url" class="sr-only">URL sumber candle</label>
+      <label for="scrape-url" class="sr-only">Candle source URL</label>
       <input
         type="url"
         id="scrape-url"
         name="scrape-url"
-        placeholder="https://contoh-sumber.com/BTCUSDT"
+        placeholder="https://example-source.com/BTCUSDT"
         required
       >
-      <button type="submit" id="start-scrape-btn" class="btn btn--primary">Mulai Scraping</button>
+      <button type="submit" id="start-scrape-btn" class="btn btn--primary">Start Scraping</button>
       <button type="button" id="stop-scrape-btn" class="btn btn--danger" hidden>Stop Scraping</button>
     </form>
 
     <div class="log-console__header">
       <span>Log Output</span>
-      <button type="button" id="clear-log-btn" class="btn btn--ghost btn--sm">Bersihkan</button>
+      <button type="button" id="clear-log-btn" class="btn btn--ghost btn--sm">Clear</button>
     </div>
     <div id="scrape-log" class="log-console" role="log" aria-live="polite">
       <div class="log-line log-line--muted">
         <span class="log-line__time">--:--:--</span>
-        <span class="log-line__msg">Menunggu proses scraping...</span>
+        <span class="log-line__msg">Waiting for scraping process...</span>
       </div>
     </div>
   </div>
 
-  <!-- ---------- CARD: DATABASE COIN ---------- -->
+  <!-- ---------- CARD: COIN DATABASE ---------- -->
   <div class="card">
     <div class="card__header">
-      <h2>Database Coin</h2>
-      <span class="status-pill status-pill--muted" id="coin-count">0 coin</span>
+      <h2>Coin Database</h2>
+      <span class="status-pill status-pill--muted" id="coin-count">0 coins</span>
     </div>
 
     <ul class="coin-list" id="coin-list">
@@ -47,7 +47,7 @@
 
     </ul>
 
-    <p class="coin-list__empty" id="coin-list-empty" hidden>Belum ada coin tersimpan.</p>
+    <p class="coin-list__empty" id="coin-list-empty" hidden>No coins saved yet.</p>
   </div>
 
 </div>

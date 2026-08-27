@@ -1,6 +1,3 @@
-// ================= KERANGKA: navigasi antar section =================
-// Logika ini murni untuk switching UI (kerangka), tidak menyentuh
-// logika model KNN atau data — itu bagian Anda isi sendiri nanti.
 
 document.addEventListener('DOMContentLoaded', () => {
     const navlinks = document.querySelectorAll('.navlink');

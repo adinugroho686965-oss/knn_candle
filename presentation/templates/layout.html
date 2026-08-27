@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,8 +11,8 @@
 </head>
 <body>
 
-  <!-- ================= KERANGKA (SHELL) ================= -->
-  <!-- Bagian ini dipakai bersama oleh section KNN maupun Data -->
+  <!-- ================= SHELL (LAYOUT FRAME) ================= -->
+  <!-- This section is shared by both the KNN and Data sections -->
   <div class="app">
 
     <header class="topbar">
@@ -33,9 +33,9 @@
         <span class="brand__text">KNN<em>Candle</em></span>
       </div>
 
-      <nav class="topbar__nav" role="tablist" aria-label="Navigasi utama">
+      <nav class="topbar__nav" role="tablist" aria-label="Main navigation">
         <button class="navlink is-active" role="tab" aria-selected="true" data-target="knn">
-          Model KNN
+          KNN Model
         </button>
         <button class="navlink" role="tab" aria-selected="false" data-target="data">
           Data
@@ -44,7 +44,7 @@
 
       <div class="topbar__status">
         <span class="status-dot" aria-hidden="true"></span>
-        <span class="status-text">Siap</span>
+        <span class="status-text">Ready</span>
       </div>
     </header>
 
@@ -53,8 +53,8 @@
       <!-- ============ SECTION: KNN ============ -->
       <section id="panel-knn" class="panel is-active" role="tabpanel" aria-labelledby="knn">
         <div class="panel__header">
-          <h1>Model KNN Candle</h1>
-          <p>Chart candlestick, prediksi, dan kontrol model akan ditempatkan di sini.</p>
+          <h1>KNN Candle Model</h1>
+          <p>Candlestick chart, predictions, and model controls will be placed here.</p>
         </div>
 
         <div class="panel__body">
@@ -65,11 +65,11 @@
         </div>
       </section>
 
-      <!-- ============ SECTION: DATA (isi bebas, ini placeholder) ============ -->
+      <!-- ============ SECTION: DATA (free-form content, this is a placeholder) ============ -->
       <section id="panel-data" class="panel" role="tabpanel" aria-labelledby="data">
         <div class="panel__header">
-          <h1>Manajemen Data</h1>
-          <p>Kelola dataset yang digunakan oleh model KNN di sini.</p>
+          <h1>Data Management</h1>
+          <p>Manage the dataset used by the KNN model here.</p>
         </div>
 
         <div class="panel__body">
@@ -79,7 +79,7 @@
 
     </main>
   </div>
-  <!-- ================= END KERANGKA ================= -->
+  <!-- ================= END SHELL ================= -->
 
 <script src="{{ url_for('static', filename='js/layout.js') }}"></script>
 <script src="{{ url_for('static', filename='js/data.js') }}"></script>

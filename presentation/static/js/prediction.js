@@ -1,19 +1,19 @@
-// ========== PREDICTION_ANALYSIS.JS — logika section "Prediksi (Analisa)" ==========
+// ========== PREDICTION_ANALYSIS.JS — "Prediction (Analysis)" section logic ==========
 //
-// Beda dengan prediction.js (versi auto forward-test):
-//   - TIDAK subscribe ke onCloseCandle / auto-run tiap candle close.
-//   - User trigger prediksi manual lewat tombol #predict-run-last-n-btn.
-//   - N candle yang dipakai sebagai input = `inputLen` dari config model
-//     (form "Konfigurasi Model" di atas), diambil dari N candle TERAKHIR
-//     pada chart (getCandlesData()).
-//   - Checkbox #predict-include-unclosed menentukan apakah candle
-//     terakhir yang belum close ikut dipakai sebagai input atau tidak.
-//   - Hasil prediksi, selain dirender ke panel, juga divisualisasikan
-//     ke candle chart lewat visualizePredictionOnChart().
+// Difference from prediction.js (auto forward-test version):
+//   - Does NOT subscribe to onCloseCandle / auto-run on every candle close.
+//   - The user triggers prediction manually via the #predict-run-last-n-btn button.
+//   - The N candles used as input = `inputLen` from the model config
+//     (the "Model Configuration" form above), taken from the LAST N candles
+//     on the chart (getCandlesData()).
+//   - The #predict-include-unclosed checkbox determines whether the last,
+//     not-yet-closed candle is included as input or not.
+//   - The prediction result, besides being rendered in the panel, is also
+//     visualized on the candle chart via visualizePredictionOnChart().
 //
-// Dependency dari candle.js (harus dimuat sebelum script ini):
-//   - getCandleCanvas() -> instance Chart.js (candleChart)
-//   - getCandlesData()  -> array candle, candleChart.data.datasets[0].data
+// Dependency from candle.js (must be loaded before this script):
+//   - getCandleCanvas() -> Chart.js instance (candleChart)
+//   - getCandlesData()  -> candle array, candleChart.data.datasets[0].data
 
 let currentModelConfig = null; // { coinId, k, threshold, inputLen, outputLen }
 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadCoinsForPrediction();
 });
 
-/* ================= FORM KONFIGURASI MODEL ================= */
+/* ================= MODEL CONFIGURATION FORM ================= */
 
 function initPredictForm() {
   const form = document.getElementById('predict-form');
@@ -46,16 +46,16 @@ function getPredictFormValues() {
   };
 }
 
-/* ================= DAFTAR KOIN (dropdown) ================= */
+/* ================= COIN LIST (dropdown) ================= */
 
 function loadCoinsForPrediction() {
   fetch('/get_all_coins')
     .then(res => res.json())
     .then(coins => renderCoinOptions(coins))
     .catch(err => {
-      console.error('Gagal memuat daftar koin untuk prediksi:', err);
+      console.error('Failed to load coin list for prediction:', err);
       const select = document.getElementById('predict-coin-select');
-      if (select) select.innerHTML = '<option value="">Gagal memuat koin</option>';
+      if (select) select.innerHTML = '<option value="">Failed to load coins</option>';
     });
 }
 
@@ -64,12 +64,12 @@ function renderCoinOptions(coins) {
   if (!select) return;
 
   if (!coins || coins.length === 0) {
-    select.innerHTML = '<option value="">Belum ada koin tersimpan</option>';
+    select.innerHTML = '<option value="">No coins saved yet</option>';
     return;
   }
 
   select.innerHTML = coins
-    .map(coin => `<option value="${coin.id}">${escapeHtml(coin.coin_pair_name)} (${coin.count_data ?? 0} candle)</option>`)
+    .map(coin => `<option value="${coin.id}">${escapeHtml(coin.coin_pair_name)} (${coin.count_data ?? 0} candles)</option>`)
     .join('');
 }
 
@@ -82,12 +82,12 @@ function escapeHtml(value) {
 /* ================= STATUS PILL ================= */
 
 const STATUS_MAP = {
-  idle:       { label: 'Siap',              css: 'idle'    },
-  preparing:  { label: 'Menyiapkan model...', css: 'running' },
-  ready:      { label: 'Model siap',        css: 'done'    },
-  predicting: { label: 'Memprediksi...',    css: 'running' },
-  done:       { label: 'Prediksi selesai',  css: 'done'    },
-  error:      { label: 'Gagal',             css: 'error'   },
+  idle:       { label: 'Ready',              css: 'idle'    },
+  preparing:  { label: 'Preparing model...', css: 'running' },
+  ready:      { label: 'Model ready',        css: 'done'    },
+  predicting: { label: 'Predicting...',      css: 'running' },
+  done:       { label: 'Prediction complete',css: 'done'    },
+  error:      { label: 'Failed',             css: 'error'   },
 };
 
 function setPredictStatus(stateKey) {
@@ -98,7 +98,7 @@ function setPredictStatus(stateKey) {
   statusEl.dataset.state = info.css;
 }
 
-/* ================= TOGGLE STATE HASIL ================= */
+/* ================= RESULT STATE TOGGLE ================= */
 
 function toggleResultState(hasResult) {
   const empty = document.getElementById('predict-result-empty');
@@ -107,7 +107,7 @@ function toggleResultState(hasResult) {
   if (filled) filled.hidden = !hasResult;
 }
 
-/* ================= SIAPKAN MODEL (tombol submit form) ================= */
+/* ================= PREPARE MODEL (form submit button) ================= */
 
 function prepareModel(params) {
   setPredictStatus('preparing');
@@ -124,7 +124,7 @@ function prepareModel(params) {
     .then(({ ok, data }) => {
       if (!ok || !data.success) {
         setPredictStatus('error');
-        console.error('Gagal menyiapkan model:', data && data.message);
+        console.error('Failed to prepare model:', data && data.message);
         return;
       }
 
@@ -135,7 +135,7 @@ function prepareModel(params) {
     })
     .catch(err => {
       setPredictStatus('error');
-      console.error('Gagal menghubungi server saat menyiapkan model:', err);
+      console.error('Failed to reach the server while preparing the model:', err);
     })
     .finally(() => {
       if (btn) btn.disabled = false;
@@ -146,13 +146,13 @@ function updateManualHint() {
   const hintEl = document.getElementById('predict-manual-hint');
   if (!hintEl) return;
   if (currentModelConfig) {
-    hintEl.textContent = `N = ${currentModelConfig.inputLen} (Panjang Input model yang sedang aktif).`;
+    hintEl.textContent = `N = ${currentModelConfig.inputLen} (currently active model's Input Length).`;
   } else {
-    hintEl.textContent = 'N = Panjang Input pada konfigurasi model di atas.';
+    hintEl.textContent = 'N = Input Length from the model configuration above.';
   }
 }
 
-/* ================= TOMBOL "PREDICT LAST N CANDLE" ================= */
+/* ================= "PREDICT LAST N CANDLE" BUTTON ================= */
 
 function initManualPredictButton() {
   const btn = document.getElementById('predict-run-last-n-btn');
@@ -163,14 +163,14 @@ function initManualPredictButton() {
 }
 
 /**
- * Entry point tombol "Predict Last N Candle".
- * N diambil dari currentModelConfig.inputLen.
- * Checkbox #predict-include-unclosed menentukan apakah candle terakhir
- * yang belum close ikut dipakai sebagai bagian dari N candle input.
+ * Entry point for the "Predict Last N Candle" button.
+ * N is taken from currentModelConfig.inputLen.
+ * The #predict-include-unclosed checkbox determines whether the last,
+ * not-yet-closed candle is included as part of the N input candles.
  */
 function predictLastNCandles() {
   if (!currentModelConfig) {
-    alert('Model belum disiapkan. Klik "Siapkan Model" dulu.');
+    alert('Model has not been prepared yet. Click "Prepare Model" first.');
     return;
   }
 
@@ -180,7 +180,7 @@ function predictLastNCandles() {
   const x = getInputCandles(inputLen, includeUnclosed);
 
   if (!x || x.length < inputLen) {
-    alert(`Candle belum cukup untuk prediksi. Butuh ${inputLen} candle, tersedia ${x ? x.length : 0}.`);
+    alert(`Not enough candles for prediction. Need ${inputLen} candles, only ${x ? x.length : 0} available.`);
     return;
   }
 
@@ -188,8 +188,8 @@ function predictLastNCandles() {
 }
 
 /**
- * Ambil `inputLen` candle terakhir dari chart (via getCandlesData()),
- * dengan opsi menyertakan/tidak candle terakhir yang belum close.
+ * Get the last `inputLen` candles from the chart (via getCandlesData()),
+ * with the option to include/exclude the last, not-yet-closed candle.
  */
 function getInputCandles(inputLen, includeUnclosed) {
   const allCandles = typeof getCandlesData === 'function' ? getCandlesData() : [];
@@ -208,22 +208,22 @@ function getInputCandles(inputLen, includeUnclosed) {
 }
 
 /**
- * TODO: sesuaikan dengan cara candle.js menandai candle yang belum close
- * (mis. flag `candle.closed`, atau bandingkan `candle.x`/timestamp
- * terhadap waktu real-time saat ini).
+ * TODO: adjust this to match how candle.js marks a candle as not yet closed
+ * (e.g. a `candle.closed` flag, or comparing `candle.x`/timestamp
+ * against the current real-time clock).
  *
- * CATATAN: saat ini di-set default `false` (candle terakhir selalu
- * dianggap BELUM close) -- artinya kalau checkbox "sertakan candle
- * belum close" TIDAK dicentang, candle paling akhir SELALU dibuang
- * dari input, apapun kondisinya. Ganti logic ini kalau kamu sudah
- * punya cara pasti mendeteksi status close candle.
+ * NOTE: currently defaults to `false` (the last candle is always
+ * treated as NOT closed) -- meaning if the "include unclosed candle"
+ * checkbox is NOT checked, the very last candle is ALWAYS dropped
+ * from the input, regardless of its actual state. Replace this logic
+ * once you have a reliable way to detect a candle's closed status.
  */
 function isCandleClosed(candle) {
-  // TODO: implementasikan sesuai struktur data candle di project ini.
+  // TODO: implement according to this project's candle data structure.
   return false;
 }
 
-/* ================= JALANKAN PREDIKSI (manual) ================= */
+/* ================= RUN PREDICTION (manual) ================= */
 
 function runPredictionFromCandles(x) {
   setPredictStatus('predicting');
@@ -237,7 +237,7 @@ function runPredictionFromCandles(x) {
     .then(({ ok, data }) => {
       if (!ok || !data.success) {
         setPredictStatus('error');
-        console.error('Gagal menjalankan prediksi:', data && data.message);
+        console.error('Failed to run prediction:', data && data.message);
         return;
       }
 
@@ -248,11 +248,11 @@ function runPredictionFromCandles(x) {
     })
     .catch(err => {
       setPredictStatus('error');
-      console.error('Gagal menghubungi server saat prediksi:', err);
+      console.error('Failed to reach the server during prediction:', err);
     });
 }
 
-/* ================= AGREGASI HASIL /predict ================= */
+/* ================= /predict RESULT AGGREGATION ================= */
 
 function summarizePredictionResults(results) {
   if (!Array.isArray(results) || results.length === 0) return null;
@@ -276,7 +276,7 @@ function summarizePredictionResults(results) {
   return { direction, confidence, upCount, downCount, total, dominancePct };
 }
 
-/* ================= RENDER HASIL PREDIKSI (panel) ================= */
+/* ================= RENDER PREDICTION RESULT (panel) ================= */
 
 function renderPredictionResult(summary, inputCandles) {
   if (!summary) {
@@ -301,7 +301,7 @@ function renderPredictionResult(summary, inputCandles) {
     directionBox.classList.toggle('predict-direction--up', isUp);
     directionBox.classList.toggle('predict-direction--down', !isUp);
   }
-  if (directionLabel) directionLabel.textContent = isUp ? 'NAIK' : 'TURUN';
+  if (directionLabel) directionLabel.textContent = isUp ? 'UP' : 'DOWN';
   if (confidenceEl) confidenceEl.textContent = `${summary.confidence}%`;
 
   if (upEl) upEl.textContent = summary.upCount;
@@ -313,29 +313,29 @@ function renderPredictionResult(summary, inputCandles) {
 
   if (metaEl) {
     const lastCandle = inputCandles && inputCandles.length ? inputCandles[inputCandles.length - 1] : null;
-    const label = lastCandle && lastCandle.time ? lastCandle.time : (lastCandle && lastCandle.x ? lastCandle.x : 'candle terakhir');
-    metaEl.textContent = `Dijalankan manual setelah ${label}, dari ${summary.total} neighbor`;
+    const label = lastCandle && lastCandle.time ? lastCandle.time : (lastCandle && lastCandle.x ? lastCandle.x : 'last candle');
+    metaEl.textContent = `Run manually after ${label}, from ${summary.total} neighbors`;
   }
 }
 
-/* ================= VISUALISASI KE CANDLE CHART ================= */
+/* ================= VISUALIZATION ON CANDLE CHART ================= */
 
 /**
- * Gambar hasil prediksi di atas candle chart (candleChart, via
+ * Draws the prediction result on top of the candle chart (candleChart, via
  * getCandleCanvas()):
- *   1. Garis input (harga close tiap candle input) -- oranye.
- *   2. Garis target UP -- hijau, cuma kalau avg_max_up > 0.
- *   3. Garis target DOWN -- merah, cuma kalau avg_max_down > 0.
+ *   1. Input line (close price of each input candle) -- orange.
+ *   2. UP target line -- green, only when avg_max_up > 0.
+ *   3. DOWN target line -- red, only when avg_max_down > 0.
  *
- * Dataset lama dengan label-label di bawah dibuang dulu tiap kali
- * fungsi ini dipanggil, supaya tidak menumpuk sisa run sebelumnya.
+ * Old datasets with the labels below are removed each time this function
+ * is called, so leftovers from previous runs don't pile up.
  */
 function visualizePredictionOnChart(data, summary, inputCandles) {
   if (!inputCandles || inputCandles.length === 0) return;
 
   if (typeof getCandleCanvas !== 'function') {
     console.warn(
-      'getCandleCanvas() tidak ditemukan -- pastikan candle.js dimuat sebelum prediction_analysis.js.'
+      'getCandleCanvas() not found -- make sure candle.js is loaded before prediction_analysis.js.'
     );
     return;
   }
@@ -344,19 +344,19 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
   if (!chart) return;
 
   // ============================================================
-  // Bersihkan highlight candles jika ada (sisa pendekatan recolor lama)
+  // Clear candle highlights if any (leftover from the old recolor approach)
   // ============================================================
   clearPredictionHighlight();
 
   // ============================================================
-  // Hapus overlay prediction dari run sebelumnya
+  // Remove the prediction overlay from the previous run
   // ============================================================
   chart.data.datasets = chart.data.datasets.filter(ds =>
     !['prediction-input-line', 'prediction-up-line', 'prediction-down-line'].includes(ds.label)
   );
 
   // ============================================================
-  // 1. GARIS INPUT
+  // 1. INPUT LINE
   // ============================================================
   const INPUT_LINE_COLOR = 'rgba(255, 152, 0, 1)';
 
@@ -379,7 +379,7 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
   chart.data.datasets.push(inputLineDataset);
 
   // ============================================================
-  // 2. AMBIL VALUE PREDICTION
+  // 2. GET PREDICTION VALUES
   // ============================================================
   const avgMaxUp = Number(data?.avg_max_up ?? 0);
   const avgMaxDown = Number(data?.avg_max_down ?? 0);
@@ -388,43 +388,43 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
   console.log('[prediction] avg_max_down:', avgMaxDown);
 
   // ============================================================
-  // 3. AMBIL RESULT PREDICTION
+  // 3. GET PREDICTION RESULT
   // ============================================================
   const predictionResult = data?.result;
 
   if (!Array.isArray(predictionResult) || predictionResult.length === 0) {
-    console.warn('[prediction] result kosong, garis prediction tidak dibuat.');
+    console.warn('[prediction] result is empty, prediction line not created.');
     chart.update('none');
     return;
   }
 
   // ============================================================
-  // 4. JUMLAH CANDLE OUTPUT
+  // 4. OUTPUT CANDLE COUNT
   //
-  // BUKAN predictionResult.length -- diambil dari
+  // NOT predictionResult.length -- taken from
   // predictionResult[0].future_scaled.length
   // ============================================================
   const outputCount = predictionResult[0]?.future_scaled?.length || 0;
 
   if (outputCount <= 0) {
-    console.warn('[prediction] future_scaled kosong atau tidak ditemukan.');
+    console.warn('[prediction] future_scaled is empty or not found.');
     chart.update('none');
     return;
   }
 
-  console.log('[prediction] jumlah candle output:', outputCount);
+  console.log('[prediction] output candle count:', outputCount);
 
   // ============================================================
-  // 5. PASTIKAN ADA MINIMAL 2 CANDLE INPUT
+  // 5. MAKE SURE THERE ARE AT LEAST 2 INPUT CANDLES
   // ============================================================
   if (inputCandles.length < 2) {
-    console.warn('[prediction] minimal membutuhkan 2 candle input untuk menghitung interval.');
+    console.warn('[prediction] at least 2 input candles are needed to compute the interval.');
     chart.update('none');
     return;
   }
 
   // ============================================================
-  // 6. AMBIL 2 CANDLE INPUT TERAKHIR
+  // 6. GET THE LAST 2 INPUT CANDLES
   // ============================================================
   const previousInputCandle = inputCandles[inputCandles.length - 2];
   const lastInputCandle = inputCandles[inputCandles.length - 1];
@@ -433,18 +433,18 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
   const lastInputX = Number(lastInputCandle.x);
 
   if (!Number.isFinite(previousX) || !Number.isFinite(lastInputX)) {
-    console.warn('[prediction] X candle input tidak valid:', { previousX, lastInputX });
+    console.warn('[prediction] invalid input candle X:', { previousX, lastInputX });
     chart.update('none');
     return;
   }
 
   // ============================================================
-  // 7. HITUNG INTERVAL CANDLE
+  // 7. CALCULATE CANDLE INTERVAL
   // ============================================================
   const candleInterval = lastInputX - previousX;
 
   if (candleInterval <= 0) {
-    console.warn('[prediction] interval candle tidak valid:', candleInterval);
+    console.warn('[prediction] invalid candle interval:', candleInterval);
     chart.update('none');
     return;
   }
@@ -454,23 +454,23 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
   console.log('[prediction] candle interval:', candleInterval);
 
   // ============================================================
-  // 8. BUAT X UNTUK CANDLE PREDICTION
+  // 8. BUILD X VALUES FOR PREDICTION CANDLES
   //
-  // Candle prediction pertama: lastInputX + interval
-  // Candle prediction terakhir: lastInputX + interval * outputCount
+  // First prediction candle: lastInputX + interval
+  // Last prediction candle: lastInputX + interval * outputCount
   // ============================================================
   const outputX = Array.from({ length: outputCount }, (_, i) => lastInputX + candleInterval * (i + 1));
 
   console.log('[prediction] output X:', outputX);
 
   // ============================================================
-  // 9. LEVEL HARGA PREDICTION (avg_max_up/down = harga absolut)
+  // 9. PREDICTION PRICE LEVELS (avg_max_up/down = absolute price)
   // ============================================================
   const upPrice = avgMaxUp;
   const downPrice = avgMaxDown;
 
   // ============================================================
-  // 10. GARIS UP -- hanya kalau avg_max_up > 0
+  // 10. UP LINE -- only if avg_max_up > 0
   // ============================================================
   if (avgMaxUp > 0) {
     const UP_COLOR = 'rgba(40, 200, 120, 1)';
@@ -482,9 +482,9 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
       borderColor: UP_COLOR,
       backgroundColor: UP_COLOR,
       borderWidth: 3,
-      pointRadius: 0,      // jangan tampilkan titik
+      pointRadius: 0,      // don't show points
       pointHoverRadius: 0,
-      hitRadius: 10,       // tetap mudah di-hover
+      hitRadius: 10,       // still easy to hover
       fill: false,
       tension: 0,
       spanGaps: true,
@@ -493,18 +493,18 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
 
     chart.data.datasets.push(upLineDataset);
 
-    console.log('[prediction] UP line dibuat:', {
+    console.log('[prediction] UP line created:', {
       price: upPrice,
       candles: outputCount,
       startX: outputX[0],
       endX: outputX[outputX.length - 1],
     });
   } else {
-    console.log('[prediction] UP line tidak dibuat karena avg_max_up = 0');
+    console.log('[prediction] UP line not created because avg_max_up = 0');
   }
 
   // ============================================================
-  // 11. GARIS DOWN -- hanya kalau avg_max_down > 0
+  // 11. DOWN LINE -- only if avg_max_down > 0
   // ============================================================
   if (avgMaxDown > 0) {
     const DOWN_COLOR = 'rgba(220, 70, 70, 1)';
@@ -527,14 +527,14 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
 
     chart.data.datasets.push(downLineDataset);
 
-    console.log('[prediction] DOWN line dibuat:', {
+    console.log('[prediction] DOWN line created:', {
       price: downPrice,
       candles: outputCount,
       startX: outputX[0],
       endX: outputX[outputX.length - 1],
     });
   } else {
-    console.log('[prediction] DOWN line tidak dibuat karena avg_max_down = 0');
+    console.log('[prediction] DOWN line not created because avg_max_down = 0');
   }
 
   // ============================================================
@@ -544,8 +544,8 @@ function visualizePredictionOnChart(data, summary, inputCandles) {
 }
 
 /**
- * Balikin warna candle ke normal.
- * Aman dipanggil walaupun highlight belum pernah digunakan.
+ * Revert candle colors back to normal.
+ * Safe to call even if the highlight was never used.
  */
 function clearPredictionHighlight() {
   if (typeof getCandleCanvas !== 'function') return;
