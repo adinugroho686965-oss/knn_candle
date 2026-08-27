@@ -35,20 +35,6 @@ The overall system architecture is shown below:
 
 ![Demo 2](demo_2.png)
 
-## Project Structure
-
-```text
-.
-├── database/
-├── machine_learning/
-├── presentation/
-├── services/
-├── architecture.png
-├── demo_1.png
-├── demo_2.png
-└── main.py
-```
-
 ## Concept
 
 The core idea is simple:
